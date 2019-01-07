@@ -6,8 +6,8 @@ LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
 RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
     # Dependencies
     apt-get update -qq &&\
-    apt-get install -y -qq libpq-dev curl build-essential \
-        libxml2-dev postgresql postgresql-contrib gnupg2 &&\
+    apt-get install -y -qq libpq-dev curl build-essential libxml2-dev \
+    libxslt1-dev postgresql postgresql-contrib gnupg2 &&\
     # NodeJS
     curl -sL https://deb.nodesource.com/setup_9.x | bash - &&\
     # Yarn
