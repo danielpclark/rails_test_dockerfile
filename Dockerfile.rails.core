@@ -1,0 +1,28 @@
+FROM ruby:2.5.3
+LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
+      Version="1.0.0" \
+      Description="Rails testing core OS build."
+
+RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
+    # Dependencies
+    apt-get update -qq &&\
+    apt-get install -y -qq libpq-dev curl build-essential \
+        libxml2-dev postgresql postgresql-contrib gnupg2 &&\
+    # NodeJS
+    curl -sL https://deb.nodesource.com/setup_9.x | bash - &&\
+    # Yarn
+    curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - &&\
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list &&\
+    apt-get update -qq && apt-get install -y -qq nodejs yarn &&\
+    # Ruby
+    gem update -N &&\
+    gem install -N rake bundler &&\
+    # Postgres
+    sed -i 's/md5/trust/g' /etc/postgresql/$(ls /etc/postgresql/ | tail -1)/main/pg_hba.conf &&\
+    echo "listen_addresses='127.0.0.1'" >> /etc/postgresql/$(ls /etc/postgresql/ | tail -1)/main/postgresql.conf &&\
+    /etc/init.d/postgresql start &&\
+    su postgres -lc "psql --command \"CREATE USER root WITH SUPERUSER PASSWORD '$(date +%s | sha256sum | base64 | head -c 32 ; echo)';\"" &&\
+    # Clean up
+    apt-get clean -y &&\
+    apt-get autoremove -y &&\
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

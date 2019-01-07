@@ -1,0 +1,14 @@
+FROM danielpclark/rails_core:2.5.3
+LABEL Maintainer="Daniel P. Clark <6ftdan@gmail.com>" \
+      Version="1.0.0" \
+      Description="Rails integration testing core OS build."
+
+RUN echo "debconf debconf/frontend select Teletype" | debconf-set-selections &&\
+    # headless browser testing support
+    apt-get update -qq &&\
+    apt-get install -y -qq $(apt-cache search chromedriver | head -n 1 | grep -o 'chrom[^ ]*') &&\
+    # Clean up
+    apt-get clean -y &&\
+    apt-get autoremove -y &&\
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
